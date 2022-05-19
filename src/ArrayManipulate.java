@@ -25,19 +25,15 @@ public class ArrayManipulate {
         }
 
         for (int i = 0; i < threadsArr.length; i++) {//wait for thread to end
-            while (threadsArr[i].getRunning()) {
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+            try {
+                threadsArr[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-
         printArray(threadsArr);
 
         for (int i = 1; i < roundsAmount; i++) {
-            System.out.println("************** round " + i);
             mIterate(threadsArr);
         }
         System.out.println("**************** Done ***************");
@@ -46,28 +42,29 @@ public class ArrayManipulate {
 
     private static void initArray(IndexThread[] arr) {
         for (int i = 0; i < arr.length; i++) {
-            arr[i] = new IndexThread(i, arr);
+            arr[i] = new IndexThread(i, arr, (int) (Math.random() * 100) + 1);
         }
 
     }
 
     private static void mIterate(IndexThread[] arr) {
+
         for (int i = 0; i < arr.length; i++) {
-            arr[i].reset();
-        }
-        for (int i = 0; i < arr.length; i++) {
-            arr[i].setRunning(true);
+            arr[i] = new IndexThread(i, arr, arr[i].getValue());
         }
 
         for (int i = 0; i < arr.length; i++) {
-            while (arr[i].getRunning()) {
-                try {
-                    Thread.sleep(5);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+            arr[i].start();
+        }
+
+        for (int i = 0; i < arr.length; i++) {
+            try {
+                arr[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
+
         printArray(arr);
     }
 
@@ -93,9 +90,14 @@ public class ArrayManipulate {
 
     private static void printArray(IndexThread[] arr) {
         if (arr.length > 0)
-            System.out.print(" Printed array [" + arr[0].getValue());
+            System.out.print("[" + arr[0].getValue());
         for (int i = 1; i < arr.length; i++) {
-            System.out.print("," + arr[i].getValue());
+            System.out.print(",");
+            if (arr[i].getValue()<10)
+                System.out.print(" ");
+            if (arr[i].getValue()<100)
+                System.out.print(" ");
+            System.out.print(arr[i].getValue());
             arr[i].gotValue();
         }
         System.out.println("]");

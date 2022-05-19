@@ -1,6 +1,5 @@
 public class IndexThread extends Thread {
-    private boolean running;
-    private boolean EndThread;
+
     private boolean gettingChecked;
     public int index;//the threads index TODO private
     private IndexThread[] arr;//the array
@@ -8,12 +7,10 @@ public class IndexThread extends Thread {
     private boolean LeftCheckedMe;
     private boolean RightCheckedMe;
 
-    public IndexThread(int index, IndexThread[] arr) {
-        this.running = true;
-        this.EndThread = false;
+    public IndexThread(int index, IndexThread[] arr, int value) {
         this.index = index;
         this.arr = arr;
-        this.value = (int) (Math.random() * 100) + 1;
+        this.value = value;
         this.LeftCheckedMe = false;
         this.RightCheckedMe = false;
         this.gettingChecked = false;
@@ -23,66 +20,50 @@ public class IndexThread extends Thread {
     @Override
     public void run() {
         super.run();
-        while (!EndThread) {
-            if (running) {
-                System.out.println("thread " + this.index + " started");
-                boolean checkedOthers = false;
-                int leftIndex = ((this.index - 1) % arr.length + arr.length) % arr.length;
-                int rightIndex = ((this.index + 1) % arr.length + arr.length) % arr.length;
 
-                int leftVal;
-                int rightVal;
+        //   System.out.println("thread " + this.index + " started");
+        boolean checkedOthers = false;
+        int leftIndex = ((this.index - 1) % arr.length + arr.length) % arr.length;
+        int rightIndex = ((this.index + 1) % arr.length + arr.length) % arr.length;
 
-                if (index % 2 == 1) {
-                    System.out.println("thread  " + this.index + "checking " + leftIndex);
-                    leftVal = arr[leftIndex].getValue(this.index);
-                    arr[leftIndex].gotValue();
+        int leftVal;
+        int rightVal;
 
-                    System.out.println("thread  " + this.index + "checking " + rightIndex);
-                    rightVal = arr[rightIndex].getValue(this.index);
-                    arr[rightIndex].gotValue();
-                } else {
+        //solved the dining philosopher problem with the following solution modded to this case
+        //"An even philosopher should pick the right chopstick and then the left chopstick while an odd philosopher should pick the left chopstick and then the right chopstick."
 
+        if (index % 2 == 1) {
+            leftVal = arr[leftIndex].getValue(this.index);
+            arr[leftIndex].gotValue();
 
-                    System.out.println("thread  " + this.index + "checking " + rightIndex);
-                    rightVal = arr[rightIndex].getValue(this.index);
-                    arr[rightIndex].gotValue();
+            rightVal = arr[rightIndex].getValue(this.index);
+            arr[rightIndex].gotValue();
+        } else {
+            rightVal = arr[rightIndex].getValue(this.index);
+            arr[rightIndex].gotValue();
 
-                    System.out.println("thread  " + this.index + "checking " + leftIndex);
-                    leftVal = arr[leftIndex].getValue(this.index);
-                    arr[leftIndex].gotValue();
-                }
-
-                while (!checkedOthers) {
-                    if (LeftCheckedMe && RightCheckedMe) {
-
-                        if (leftVal > this.value && rightVal > this.value) {
-                            this.value++;
-                        } else if (leftVal < this.value && rightVal < this.value) {
-                            this.value--;
-                        }
-
-                        checkedOthers = true;
-                    }
-                }
-
-                System.out.println("thread " + this.index + " ended");
-            }
-            running = false;
+            leftVal = arr[leftIndex].getValue(this.index);
+            arr[leftIndex].gotValue();
         }
 
+        while (!checkedOthers) {
+            if (LeftCheckedMe && RightCheckedMe) {
+
+                if (leftVal > this.value && rightVal > this.value) {
+                    this.value++;
+                } else if (leftVal < this.value && rightVal < this.value) {
+                    this.value--;
+                }
+
+                checkedOthers = true;
+            }
+        }
+
+        //  System.out.println("thread " + this.index + " ended");
     }
 
 
-    public synchronized int getValue() {
-        while (gettingChecked) {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        gettingChecked = true;
+    public int getValue() {
         return this.value;
     }
 
@@ -105,23 +86,4 @@ public class IndexThread extends Thread {
         notifyAll();
     }
 
-    public void endProcess() {
-        this.EndThread = true;
-    }
-
-    public  boolean getRunning() {
-        return this.running;
-    }
-
-
-    public synchronized void reset(){
-        this.LeftCheckedMe = false;
-        this.RightCheckedMe = false;
-        this.gettingChecked = false;
-        notifyAll();
-    }
-    public synchronized void setRunning(boolean running) {
-        System.out.println("restarting "+index);
-        this.running = running;
-    }
 }
