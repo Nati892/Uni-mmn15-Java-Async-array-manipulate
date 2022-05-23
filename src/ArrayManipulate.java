@@ -20,20 +20,8 @@ public class ArrayManipulate {
         initArray(threadsArr);
         printArray(threadsArr);
 
-        for (int i = 0; i < threadsArr.length; i++) {
-            threadsArr[i].start();
-        }
-
-        for (int i = 0; i < threadsArr.length; i++) {//wait for thread to end
-            try {
-                threadsArr[i].join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        printArray(threadsArr);
-
-        for (int i = 1; i < roundsAmount; i++) {
+        //iterate array of threads m times
+        for (int i = 0; i < roundsAmount; i++) {
             mIterate(threadsArr);
         }
         System.out.println("**************** Done ***************");
@@ -49,15 +37,15 @@ public class ArrayManipulate {
 
     private static void mIterate(IndexThread[] arr) {
 
-        for (int i = 0; i < arr.length; i++) {
+        for (int i = 0; i < arr.length; i++) {//remake array of threads
             arr[i] = new IndexThread(i, arr, arr[i].getValue());
         }
 
-        for (int i = 0; i < arr.length; i++) {
+        for (int i = 0; i < arr.length; i++) {//restart threads
             arr[i].start();
         }
 
-        for (int i = 0; i < arr.length; i++) {
+        for (int i = 0; i < arr.length; i++) {//wait for threads to finish
             try {
                 arr[i].join();
             } catch (InterruptedException e) {
@@ -72,31 +60,26 @@ public class ArrayManipulate {
     private static int inputPositiveNum(int min) {
         int res = 0;
         boolean good_input = false;
+        System.out.println("Please enter an integer of minimum " + min);
         while (!good_input) {
             try {
-                System.out.println("Please enter an integer of minimum " + min);
                 res = Integer.parseInt(scanner.next());
-                if (res >= min)
-                    good_input = true;
-                else
-                    System.out.println("The number must be a minimum of " + min);
+                if (res >= min) good_input = true;
+                else System.out.println("The number must be a minimum of " + min + "please re enter");
             } catch (Exception e) {
-                System.out.println("Please re-enter integer");
+                System.out.println("Error - Please re-enter integer");
             }
         }
         return res;
     }
 
-
+    //a beautiful print of the array's numbers
     private static void printArray(IndexThread[] arr) {
-        if (arr.length > 0)
-            System.out.print("[" + arr[0].getValue());
+        if (arr.length > 0) System.out.print("[" + arr[0].getValue());
         for (int i = 1; i < arr.length; i++) {
             System.out.print(",");
-            if (arr[i].getValue()<10)
-                System.out.print(" ");
-            if (arr[i].getValue()<100)
-                System.out.print(" ");
+            if (arr[i].getValue() < 10) System.out.print(" ");
+            if (arr[i].getValue() < 100) System.out.print(" ");
             System.out.print(arr[i].getValue());
             arr[i].gotValue();
         }
